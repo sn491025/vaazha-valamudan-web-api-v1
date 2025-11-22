@@ -1,0 +1,19 @@
+services:
+  web-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: web-api
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.development
+    volumes:
+      - .:/app                # Mount local source code into container
+      - /app/node_modules     # Prevent overwriting node_modules
+    command: pnpm run start:dev   # Run in watch mode for development
+    depends_on:
+      - postgres
+      - redis
+      - elasticsearch
