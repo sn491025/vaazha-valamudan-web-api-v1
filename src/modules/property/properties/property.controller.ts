@@ -315,7 +315,8 @@ export class PropertyController {
       p,
       l,
       { status, listing_type, approval_status: approval_status },
-      user.id
+      user.id,
+      user.roles
     );
   }
 

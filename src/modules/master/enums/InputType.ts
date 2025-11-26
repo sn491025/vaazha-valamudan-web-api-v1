@@ -4,5 +4,6 @@ export enum InputType {
   NUMERIC = 'numeric',
   TEXT = 'text',
   BOOLEAN = 'boolean',
-  UNITS = 'units'
+  UNITS = 'units',
+  PRICES = 'prices',
 }

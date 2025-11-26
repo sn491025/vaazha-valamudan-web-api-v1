@@ -23,13 +23,12 @@ export const AppDataSource = new DataSource({
   postgresql://dina:eaMlT6SYgNJowjv4XYw7A2GarihOWYzy@dpg-d4gjoi95pdvs738l3d2g-a/realestatedb_fcd3
 */
 
-// postgresql://postgres:rlzBWEYcMJBBxsPMtZwAcSoWOwKuyOCJ@nozomi.proxy.rlwy.net:59334/railway
   type: 'postgres',
-  host: process.env.POSTGRES_HOST || 'nozomi.proxy.rlwy.net',
-  port: parseInt(process.env.POSTGRES_PORT || '59334', 10),
-  username: process.env.POSTGRES_USER || 'postgres',
-  password: process.env.POSTGRES_PASSWORD || 'rlzBWEYcMJBBxsPMtZwAcSoWOwKuyOCJ',
-  database: process.env.POSTGRES_DB || 'railway',
+  host: process.env.DB_HOST || 'dpg-d4gjoi95pdvs738l3d2g-a.singapore-postgres.render.com',
+  port: parseInt(process.env.DB_PORT || '5432', 10),
+  username: process.env.DB_USERNAME || 'dina',
+  password: process.env.DB_PASSWORD || 'eaMlT6SYgNJowjv4XYw7A2GarihOWYzy',
+  database: process.env.DB_NAME || 'realestatedb_fcd3',
   migrations: [path.join(__dirname, '..', 'migrations', '*{.ts,.js}')],
   // Auto-discover all entity files in the compiled dist (and ts in dev)
   entities: [path.join(__dirname, '..', '', '*.entity.{js,ts}')],

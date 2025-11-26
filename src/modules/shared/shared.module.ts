@@ -1,6 +1,5 @@
 import { Module, Global } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
 import { OtpService } from './services/otp/otp.service';
 import { EmailService } from './services/email/email.service';
 import { Otp } from './entities/otp.entity';
@@ -12,6 +11,7 @@ import { EmailOtpService } from './services/otp/email-otp.service';
 import { WhatsAppOtpService } from './services/otp/whatsapp-otp.service';
 import { CustomOtpService } from './services/otp/custom-otp.service';
 import { S3StorageService } from './storage/s3-storage.service';
+import { HttpModule } from '@nestjs/axios';
 
 const services = [
   OtpService,
@@ -29,6 +29,10 @@ const services = [
 @Module({
   imports: [
     TypeOrmModule.forFeature([Otp, DeviceSession]),
+    HttpModule.register({
+      timeout: 30000,
+      maxRedirects: 3,
+    }),
   ],
   providers: services,
   exports: services,

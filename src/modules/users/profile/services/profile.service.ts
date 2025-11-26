@@ -18,8 +18,7 @@ export class ProfileService {
 
   async findByEmail(email: string): Promise<User | null> {
     return await this.userRepository.findOne({
-      where: { email },
-      relations: ['roles']
+      where: { email }
     });
   }
 
@@ -32,21 +31,20 @@ export class ProfileService {
     isActive: boolean;
   }): Promise<User> {
     const user = this.userRepository.create(createUserData);
-    user.userType = UserType.BUYER;
+    user.roles = [UserType.BUYER];
     return await this.userRepository.save(user);
   }
 
   async findById(id: string): Promise<User | null> {
     return await this.userRepository.findOne({
-      where: { id },
-      relations: ['roles']
+      where: { id }
     });
   }
 
   async getProfile(userId: string): Promise<Omit<User, 'password'>> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['roles', 'loginHistory']
+      relations: ['loginHistory']
     });
 
     if (!user) {
@@ -111,8 +109,7 @@ export class ProfileService {
   // Method to find user by phone number for mobile login
   async findByPhoneNumber(phoneNumber: string): Promise<User | null> {
     return await this.userRepository.findOne({
-      where: { phoneNumber },
-      relations: ['roles']
+      where: { phoneNumber }
     });
   }
 
@@ -178,7 +175,7 @@ export class ProfileService {
       // Remove temporary field reference in the payload
       delete (userData as any)['referredByCode'];
     }
-    userData.userType = UserType.BUYER;
+    userData.roles = [UserType.BUYER];
     const user = this.userRepository.create(userData);
     return await this.userRepository.save(user);
   }

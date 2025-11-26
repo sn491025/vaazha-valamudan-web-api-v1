@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { LoginHistory } from '../../entities/login-history.entity';
 import { BusinessException } from '../../../../common';
-import { ProfileService, User } from '../../../users';
+import { ProfileService, RolesService, User } from '../../../users';
 import {
   OtpPurpose,
   OtpService,
@@ -17,13 +17,19 @@ import {
   DeviceType
 } from '../../../shared';
 import { LoginRequestDto, LoginResponseDto, VerifyOtpDto } from '../dto';
+import { AgentCompanyProfileService } from '../../../users/company-profile/service/agent-company-profile.service';
+import { UserInfoDto } from '../dto/user-info.dto';
+import { AgentProfileInfoDto } from '../dto/agent-profile-info.dto';
+import { UserType } from '../../../users/enums/usertype';
 
 @Injectable()
 export class LoginService {
   constructor(
     @InjectRepository(LoginHistory)
     private loginHistoryRepository: Repository<LoginHistory>,
+    private roleService: RolesService,
     private usersService: ProfileService,
+    private agentCompanyProfileService: AgentCompanyProfileService,
     private otpService: OtpService,
     private jwtAuth: JwtAuthService
   ) {}
@@ -105,14 +111,7 @@ export class LoginService {
       return {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          phoneNumber: user.phoneNumber,
-          roles: user.roles?.map((role) => role.name) || []
-        }
+        user: await this.mapUserToUserInfoDto(user)
       };
     } catch (error) {
       if (
@@ -128,7 +127,7 @@ export class LoginService {
   private async generateTokens(
     user: User
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const roles = user.roles?.map((r) => r.name) || [];
+    const roles = user.roles || [UserType.BUYER.toString()];
     return this.jwtAuth.generateTokenPair(user.id, roles, DeviceType.WEB);
   }
 
@@ -136,7 +135,7 @@ export class LoginService {
     user: User,
     deviceType: DeviceType = DeviceType.WEB
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const roles = user.roles?.map((r) => r.name) || [];
+    const roles = user.roles || [UserType.BUYER.toString()];
     return this.jwtAuth.generateTokenPair(user.id, roles, deviceType);
   }
 
@@ -150,7 +149,7 @@ export class LoginService {
     rolesAllowed: string[] = ['USER'],
     deviceType: DeviceType = DeviceType.WEB
   ): Promise<LoginResponseDto> {
-    const userRoles = user.roles?.map((r) => r.name) || [];
+    const userRoles = user.roles || [UserType.BUYER.toString()];
     const hasRequiredRole =
       rolesAllowed.length === 0 ||
       userRoles.some((r) => rolesAllowed.includes(r));
@@ -167,14 +166,7 @@ export class LoginService {
     return {
       accessToken,
       refreshToken,
-      user: {
-        id: user.id,
-        email: user.email || '',
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phoneNumber: user.phoneNumber,
-        roles: userRoles
-      }
+      user: await this.mapUserToUserInfoDto(user)
     };
   }
 
@@ -191,20 +183,13 @@ export class LoginService {
     }
     const { accessToken, refreshToken } = this.jwtAuth.generateTokenPair(
       user.id,
-      user.roles?.map((r) => r.name) || [],
+      user.roles || [UserType.BUYER.toString()],
       deviceType
     );
     return {
       accessToken,
       refreshToken,
-      user: {
-        id: user.id,
-        email: user.email || '',
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phoneNumber: user.phoneNumber,
-        roles: user.roles?.map((role) => role.name) || []
-      }
+      user: await this.mapUserToUserInfoDto(user)
     };
   }
 
@@ -220,7 +205,7 @@ export class LoginService {
     if (!user.isActive) {
       throw new UnauthorizedException('Account deactivated');
     }
-    const userRoles = user.roles?.map((r) => r.name) || [];
+    const userRoles = user.roles || [UserType.BUYER.toString()];
     const hasRequiredRole =
       rolesAllowed.length === 0 ||
       userRoles.some((r) => rolesAllowed.includes(r));
@@ -237,14 +222,7 @@ export class LoginService {
     return {
       accessToken,
       refreshToken,
-      user: {
-        id: user.id,
-        email: user.email || '',
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phoneNumber: user.phoneNumber,
-        roles: userRoles
-      }
+      user: await this.mapUserToUserInfoDto(user)
     };
   }
 
@@ -342,6 +320,9 @@ export class LoginService {
           throw new UnauthorizedException('User not found');
         }
 
+        let role = await  this.roleService.findOneByRoleName('');
+
+
         user = await this.usersService.createWithReferral({
           email: dto.user?.email,
           firstName: dto.user?.firstName,
@@ -382,14 +363,7 @@ export class LoginService {
       return {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
-        user: {
-          id: user.id,
-          email: user.email || '',
-          firstName: user.firstName,
-          lastName: user.lastName,
-          phoneNumber: user.phoneNumber,
-          roles: user.roles?.map((role) => role.name) || []
-        }
+        user: await this.mapUserToUserInfoDto(user)
       };
     } catch (error) {
       if (error instanceof UnauthorizedException) {
@@ -397,5 +371,32 @@ export class LoginService {
       }
       throw new InternalServerErrorException(error);
     }
+  }
+
+  async mapUserToUserInfoDto(user: User): Promise<UserInfoDto> {
+    const dto = new UserInfoDto();
+
+    dto.id = user.id;
+    dto.email = user.email;
+    dto.phoneNumber = user.phoneNumber ?? null;
+    dto.firstName = user.firstName;
+    dto.lastName = (user as any).lastName ?? null;
+    dto.isActive = (user as any).isActive ?? false;
+
+    // Map roles to a simple list (adjust if UserInfoDto expects a different shape)
+    dto.roles =
+      user.roles ?? [];
+    dto.agent = new AgentProfileInfoDto();
+
+    let agentCompanyProfile =
+      await this.agentCompanyProfileService.findAllByUserId(user.id, {});
+    let agent = agentCompanyProfile[0];
+    if (agentCompanyProfile && agentCompanyProfile.length > 0) {
+      dto.agent.agent_id = agent.id;
+      dto.agent.agent_name = agent.companyName;
+      dto.agent.agent_profile_name = agent.profileName;
+    }
+
+    return dto;
   }
 }

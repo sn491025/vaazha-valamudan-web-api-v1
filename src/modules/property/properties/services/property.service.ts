@@ -15,6 +15,7 @@ import { PropertyResponseDto } from '../dto/property-response.dto';
 import { Favorite } from '../../../user-interactions/entities/favorite.entity';
 import { EntityType } from '../../../user-interactions/dto';
 import { User } from '../../../users';
+import { UserType } from '../../../users/enums/usertype';
 
 @Injectable()
 export class PropertyService {
@@ -43,10 +44,15 @@ export class PropertyService {
       listing_type: string | undefined;
       approval_status?: string | null;
     },
-    userId?: string
+    userId?: string,
+    userRoles?: string[]
   ) {
     const skipCount = (page - 1) * limit;
     const whereConditions = this.buildWhereConditions(filters);
+
+    if (!(userRoles?.includes(UserType.ADMIN))) {
+      whereConditions.owner_id = userId;
+    }
 
     const queryOptions = {
       where: whereConditions,
@@ -235,6 +241,8 @@ export class PropertyService {
             displayValue = fv.values ? 'Yes' : 'No';
           } else if (categoryInputType === InputType.UNITS) {
             displayValue = `${fv.values} ${fv.units || ''}`;
+          } else if (categoryInputType === InputType.PRICES) {
+            displayValue = `${fv.values}`;
           }
         }
 
@@ -308,6 +316,13 @@ export class PropertyService {
 
     if (dto.features?.length) {
       await this.replaceFeatures(saved.id, dto.features);
+    }
+
+    let user = await this.userRepo.findOne({ where: { id: ownerId } });
+    if(user && !user.roles.includes(UserType.AGENT)){
+      await this.userRepo.update(ownerId,{
+        roles: [...user.roles, UserType.AGENT]
+      });
     }
 
     return this.findOne(saved.id);

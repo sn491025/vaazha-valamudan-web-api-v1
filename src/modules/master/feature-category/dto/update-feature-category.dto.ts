@@ -19,7 +19,7 @@ export class UpdateFeatureCategoryDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ description: 'Input type', example: 'single_select', enum: ['single_select', 'multi_select', 'numeric', 'text'], required: false })
+  @ApiProperty({ description: 'Input type', example: 'single_select', enum: InputType, required: false })
   @IsOptional()
   @IsEnum(InputType)
   inputType?: InputType;
