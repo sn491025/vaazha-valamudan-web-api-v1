@@ -34,7 +34,7 @@ export class LoginController {
       phoneLogin: {
         summary: 'Login with phone number',
         value: {
-          phoneNumber: '+1234567890',
+          phoneNumber: '+919884562624',
           password: 'password123',
           device: {
             deviceType: 'mobile',
@@ -66,7 +66,7 @@ export class LoginController {
       example1: {
         summary: 'Send OTP for any phone number',
         value: {
-          phoneNumber: '+1234567890',
+          phoneNumber: '+919884562624',
           otpTypes: ['whatsapp_otp', 'sms_otp']
         }
       }
@@ -87,8 +87,8 @@ export class LoginController {
       existingUser: {
         summary: 'Existing user login (mobile)',
         value: {
-          phoneNumber: '+1234567890',
-          otp: '123456',
+          phoneNumber: '+919884562624',
+          otp: '111111',
           device: {
             deviceType: 'mobile',
             deviceId: 'android:abcd-1234',
@@ -100,14 +100,12 @@ export class LoginController {
       newUser: {
         summary: 'First-time user registration via OTP (then login)',
         value: {
-          phoneNumber: '+1234567890',
-          otp: '123456',
+          phoneNumber: '+919884562624',
+          otp: '111111',
           user: {
-            email: 'newuser@example.com',
-            firstName: 'John',
-            lastName: 'Doe',
-            password: 'password123',
-            referralCode: 'ABC12345'
+            email: 'dineshrightnow@gmail.com',
+            firstName: 'Dinesh',
+            lastName: 'Jaganmohan'
           },
           device: {
             deviceType: 'mobile',

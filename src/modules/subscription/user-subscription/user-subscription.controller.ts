@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UserSubscriptionService } from './services/user-subscription.service';
 import { SubscriptionFeatureService } from '../subscription-feature/services/subscription-feature.service';
-import { PurchaseAddonDto, RecordFeatureUsageDto, SubscribeUserDto, UpdateUserSubscriptionDto } from './dto/user-subscription.dto';
+import { CreateAddonOrderDto, CreateSubscriptionOrderDto, VerifyPaymentDto, PurchaseAddonDto, RecordFeatureUsageDto, SubscribeUserDto, UpdateUserSubscriptionDto } from './dto/user-subscription.dto';
 
 @ApiTags('user-subscriptions')
 @Controller()
@@ -10,13 +10,13 @@ export class UserSubscriptionController {
   constructor(
     private readonly userSubService: UserSubscriptionService,
     private readonly featureService: SubscriptionFeatureService,
-  ) {}
+  ) { }
 
   @Get('users/:userId/subscription')
   @ApiOperation({ summary: "Get user's active subscription" })
   @ApiParam({ name: 'userId', example: 101 })
   async active(@Param('userId') userId: string) {
-    return this.userSubService.getActive(Number(userId));
+    return this.userSubService.getActive(userId);
   }
 
   @Post('users/:userId/subscribe')
@@ -41,7 +41,7 @@ export class UserSubscriptionController {
     },
   })
   async subscribe(@Param('userId') userId: string, @Body() dto: SubscribeUserDto) {
-    return this.userSubService.subscribe(Number(userId), dto);
+    return this.userSubService.subscribe(userId, dto);
   }
 
   @Put('users/:userId/subscription/:id')
@@ -53,7 +53,7 @@ export class UserSubscriptionController {
     @Param('id') id: string,
     @Body() dto: UpdateUserSubscriptionDto,
   ) {
-    return this.userSubService.update(Number(userId), Number(id), dto);
+    return this.userSubService.update(userId, Number(id), dto);
   }
 
   @Post('users/:userId/subscription/:id/cancel')
@@ -67,7 +67,23 @@ export class UserSubscriptionController {
     },
   })
   async cancel(@Param('userId') userId: string, @Param('id') id: string, @Body() body: { reason?: string }) {
-    return this.userSubService.cancel(Number(userId), Number(id), body?.reason);
+    return this.userSubService.cancel(userId, Number(id), body?.reason);
+  }
+
+  @Post('users/:userId/subscribe/order')
+  @ApiOperation({ summary: 'Create Subscription Order' })
+  @ApiParam({ name: 'userId', example: 101 })
+  @ApiBody({ type: CreateSubscriptionOrderDto })
+  async createSubscriptionOrder(@Param('userId') userId: string, @Body() dto: CreateSubscriptionOrderDto) {
+    return this.userSubService.createSubscriptionOrder(userId as string, dto.plan_id);
+  }
+
+  @Post('users/:userId/subscribe/verify')
+  @ApiOperation({ summary: 'Verify Subscription Payment' })
+  @ApiParam({ name: 'userId', example: 101 })
+  @ApiBody({ type: VerifyPaymentDto })
+  async verifySubscription(@Param('userId') userId: string, @Body() dto: VerifyPaymentDto) {
+    return this.userSubService.verifySubscription(userId, dto);
   }
 
   @Post('users/:userId/add-ons')
@@ -92,14 +108,30 @@ export class UserSubscriptionController {
     },
   })
   async purchaseAddon(@Param('userId') userId: string, @Body() dto: PurchaseAddonDto) {
-    return this.userSubService.purchaseAddon(Number(userId), dto);
+    return this.userSubService.purchaseAddon(userId, dto);
+  }
+
+  @Post('users/:userId/addons/order')
+  @ApiOperation({ summary: 'Create Add-on Order' })
+  @ApiParam({ name: 'userId', example: 101 })
+  @ApiBody({ type: CreateAddonOrderDto })
+  async createAddonOrder(@Param('userId') userId: string, @Body() dto: CreateAddonOrderDto) {
+    return this.userSubService.createAddonOrder(userId, dto.item_id);
+  }
+
+  @Post('users/:userId/addons/verify')
+  @ApiOperation({ summary: 'Verify Add-on Payment' })
+  @ApiParam({ name: 'userId', example: 101 })
+  @ApiBody({ type: VerifyPaymentDto })
+  async verifyAddon(@Param('userId') userId: string, @Body() dto: VerifyPaymentDto) {
+    return this.userSubService.verifyAddon(userId, dto);
   }
 
   @Get('users/:userId/add-ons')
   @ApiOperation({ summary: "Get user's add-ons" })
   @ApiParam({ name: 'userId', example: 101 })
   async addons(@Param('userId') userId: string) {
-    return this.userSubService.listAddons(Number(userId));
+    return this.userSubService.listAddons(userId);
   }
 
   @Get('users/:userId/features/:featureName/access')
@@ -107,7 +139,7 @@ export class UserSubscriptionController {
   @ApiParam({ name: 'userId', example: 101 })
   @ApiParam({ name: 'featureName', example: 'Video Upload' })
   async access(@Param('userId') userId: string, @Param('featureName') featureName: string) {
-    const hasAccess = await this.featureService.userHasFeatureAccess(Number(userId), featureName);
+    const hasAccess = await this.featureService.userHasFeatureAccess(userId, featureName);
     return { success: true, data: { hasAccess } };
   }
 
@@ -115,7 +147,7 @@ export class UserSubscriptionController {
   @ApiOperation({ summary: 'Get feature usage' })
   @ApiParam({ name: 'userId', example: 101 })
   async usage(@Param('userId') userId: string) {
-    const data = await this.featureService.getUsage(Number(userId));
+    const data = await this.featureService.getUsage(userId);
     return { success: true, data };
   }
 
@@ -132,7 +164,7 @@ export class UserSubscriptionController {
     @Param('featureName') featureName: string,
     @Body() body: RecordFeatureUsageDto,
   ) {
-    const ok = await this.featureService.recordFeatureUsage(Number(userId), featureName, body?.usageCount ?? 1, body?.usageValue ?? 0);
+    const ok = await this.featureService.recordFeatureUsage(userId, featureName, body?.usageCount ?? 1, body?.usageValue ?? 0);
     return { success: ok };
   }
 }

@@ -12,7 +12,7 @@ import {
   Min,
   ValidateNested
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { PropertyFeatureValueDto } from './property-feature-value.dto';
 import { Column } from 'typeorm';
 
@@ -131,7 +131,12 @@ export class CreatePropertyDto {
     description: 'Agent/broker ID if different from owner',
     example: '22222222-2222-2222-2222-222222222222'
   })
-  @IsUUID()
+  @Transform(({ value }) => {
+    if (!value || value === '') {
+      return null;
+    }
+    return value;
+  }, { toClassOnly: true })
   @IsOptional()
   agent_id?: string;
 

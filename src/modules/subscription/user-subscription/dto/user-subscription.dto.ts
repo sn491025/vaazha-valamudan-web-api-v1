@@ -102,3 +102,33 @@ export class RecordFeatureUsageDto {
   @IsNumber()
   usageValue: number;
 }
+
+export class CreateSubscriptionOrderDto {
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  plan_id: number;
+}
+
+export class CreateAddonOrderDto {
+  @ApiProperty({ example: 10 })
+  @IsNumber()
+  item_id: number;
+
+  @ApiProperty({ example: 42 })
+  @IsNumber()
+  userSubscription_id: number;
+}
+
+export class VerifyPaymentDto {
+  @ApiProperty({ example: 'order_123' })
+  @IsString()
+  razorpay_order_id: string;
+
+  @ApiProperty({ example: 'pay_123' })
+  @IsString()
+  razorpay_payment_id: string;
+
+  @ApiProperty({ example: 'sig_123' })
+  @IsString()
+  razorpay_signature: string;
+}

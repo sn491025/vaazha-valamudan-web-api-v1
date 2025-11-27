@@ -2,6 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, ValidateIf, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { FeatureOptionUpsertDto } from './feature-option-upsert.dto';
+import { InputType } from '../../enums/InputType';
 
 export class UpdateFeatureCategoryWithOptionsDto {
   @ApiPropertyOptional({ description: 'Display name', example: 'BHK Configuration' })
@@ -23,11 +24,11 @@ export class UpdateFeatureCategoryWithOptionsDto {
   @ApiPropertyOptional({
     description: 'Input type',
     example: 'single_select',
-    enum: ['single_select', 'multi_select', 'numeric', 'text'],
+    enum: InputType,
   })
   @IsOptional()
-  @IsEnum(['single_select', 'multi_select', 'numeric', 'text'])
-  inputType?: 'single_select' | 'multi_select' | 'numeric' | 'text';
+  @IsEnum(InputType)
+  inputType?: InputType;
 
   @ApiPropertyOptional({ description: 'Filterable in search', example: true })
   @IsOptional()

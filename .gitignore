@@ -12,6 +12,11 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+
+#pnpm
+
+pnpm-workspace.yaml
+
 # OS
 .DS_Store
 
@@ -37,7 +42,7 @@ lerna-debug.log*
 
 # dotenv environment variable files
 .env
-.env.development
+.env.development.local
 .env.test.local
 .env.production.local
 .env.local
@@ -55,7 +60,4 @@ pids
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 /src/migrations/*.ts
-
-
-.env.development
 

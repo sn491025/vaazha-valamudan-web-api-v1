@@ -101,10 +101,35 @@ export class AdApprovalService {
   }
 
   async approveAd(adId: string, adminId: string, dto: ApproveAdDto) {
-    const approval = await this.adApprovalRepo.findOne({
-      where: { ad_id: adId, status: 'PENDING' },
+    const ads = await this.adRepo.findOne({
+      where: { id: adId },
     });
-    if (!approval) throw new NotFoundException('No pending approval found for this ad');
+    if (!ads) throw new NotFoundException('No pending approval found for this ad');
+
+    let approval = await this.adApprovalRepo.findOne({
+      where: { ad_id: adId },
+      order: { created_at: 'DESC' }
+    });
+
+    if (!approval) {
+
+      approval = this.adApprovalRepo.create({
+        ad_id: adId,
+        status: 'APPROVED',
+        reviewed_by_id: adminId,
+        admin_notes: dto.admin_notes,
+        reviewed_at: new Date(),
+      });
+      await this.adApprovalRepo.save(approval);
+    } else {
+      // Update existing approval
+      await this.adApprovalRepo.update(approval.id, {
+        status: 'APPROVED',
+        reviewed_by_id: adminId,
+        admin_notes: dto.admin_notes,
+        reviewed_at: new Date(),
+      });
+    }
 
     await this.adApprovalRepo.update(approval.id, {
       status: 'APPROVED',
@@ -124,18 +149,37 @@ export class AdApprovalService {
     }
 
   async rejectAd(adId: string, adminId: string, dto: RejectAdDto) {
-    const approval = await this.adApprovalRepo.findOne({
-      where: { ad_id: adId, status: 'PENDING' },
+    const ads = await this.adRepo.findOne({
+      where: { id: adId },
     });
-    if (!approval) throw new NotFoundException('No pending approval found for this ad');
+    if (!ads) throw new NotFoundException('No pending approval found for this ad');
 
-    await this.adApprovalRepo.update(approval.id, {
-      status: 'REJECTED',
-      reviewed_by_id: adminId,
-      rejection_reason: dto.rejection_reason,
-      admin_notes: dto.admin_notes,
-      reviewed_at: new Date(),
+    let approval = await this.adApprovalRepo.findOne({
+      where: { ad_id: adId },
+      order: { created_at: 'DESC' }
     });
+
+    if (!approval) {
+
+      approval = this.adApprovalRepo.create({
+        ad_id: adId,
+        status: 'REJECTED',
+        reviewed_by_id: adminId,
+        rejection_reason: dto.rejection_reason,
+        admin_notes: dto.admin_notes,
+        reviewed_at: new Date(),
+      });
+      await this.adApprovalRepo.save(approval);
+    } else {
+      // Update existing approval
+      await this.adApprovalRepo.update(approval.id, {
+        status: 'REJECTED',
+        reviewed_by_id: adminId,
+        rejection_reason: dto.rejection_reason,
+        admin_notes: dto.admin_notes,
+        reviewed_at: new Date(),
+      });
+    }
 
     await this.adRepo.update(adId, {
       approval_status: 'REJECTED',

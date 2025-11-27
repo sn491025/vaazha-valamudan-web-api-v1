@@ -1,6 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsEnum, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, IsUUID, Min, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsLatitude,
+  IsLongitude,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+  ValidateIf,
+  ValidateNested
+} from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 import { PropertyFeatureValueDto } from './property-feature-value.dto';
 import { UpdatePropertyMediaDto } from '../../property-media/dto/update-property-media.dto';
 import { Column } from 'typeorm';
@@ -105,8 +118,13 @@ export class UpdatePropertyDto {
   @IsOptional()
   longitude?: number;
 
-  @ApiPropertyOptional({ description: 'Agent/broker ID if different from owner', example: '22222222-2222-2222-2222-222222222222' })
-  @IsUUID()
+  @ApiPropertyOptional({ description: 'Agent/broker ID if different from owner', example: '22222222-2222-2222-2222-222222222222', nullable: true })
+  @Transform(({ value }) => {
+    if (!value || value === '') {
+      return null;
+    }
+    return value;
+  }, { toClassOnly: true })
   @IsOptional()
   agent_id?: string;
 

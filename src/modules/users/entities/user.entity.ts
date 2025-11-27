@@ -1,8 +1,7 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany, JoinTable
 } from 'typeorm';
-import { Role } from './role.entity';
-import { LoginHistory } from '../../auth/entities/login-history.entity';
+import { LoginHistory } from '../../auth';
 import { UserType } from '../enums/usertype';
 
 @Entity('users')
@@ -36,27 +35,12 @@ export class User {
 
   @Column({
     type: 'enum',
+    array: true,
     enum: UserType,
-    nullable: true
+    default: [UserType.BUYER]
   })
-  userType?: string;
+  roles: UserType[];
 
-  @ManyToMany(() => Role, (role) => role.users, { eager: true })
-  @JoinTable({
-    name: 'user_roles',
-    joinColumn: { name: 'userId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'roleId', referencedColumnName: 'id' },
-  })
-  roles: Role[];
-
-  // @ManyToMany(() => Subscription, (subscription) => subscription.users, { eager: true })
-  // @JoinTable({
-  //   name: 'user_subscriptions',
-  //   joinColumn: { name: 'userId', referencedColumnName: 'id' },
-  //   inverseJoinColumn: { name: 'subscriptionId', referencedColumnName: 'id' },
-  // })
-  // subscriptions: Subscription[];
-  //
   @OneToMany(() => LoginHistory, (history) => history.user)
   loginHistory: LoginHistory[];
 

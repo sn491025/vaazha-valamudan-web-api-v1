@@ -17,7 +17,7 @@ export class SubscriptionFeatureService {
     @InjectRepository(UserPurchasedItem) private readonly purchasedRepo: Repository<UserPurchasedItem>,
   ) {}
 
-  async userHasFeatureAccess(userId: number, featureName: string) {
+  async userHasFeatureAccess(userId: string, featureName: string) {
     const now = new Date();
     const sub = await this.subRepo.findOne({
       where: { user_id: userId, isActive: true, endDate: MoreThanOrEqual(now) },
@@ -56,7 +56,7 @@ export class SubscriptionFeatureService {
   }
 
   async recordFeatureUsage(
-    userId: number,
+    userId: string,
     featureName: string,
     usageCount = 1,
     usageValue = 0,
@@ -92,7 +92,7 @@ export class SubscriptionFeatureService {
     return true;
   }
 
-  async getUsage(userId: number) {
+  async getUsage(userId: string) {
     const now = new Date();
     const sub = await this.subRepo.findOne({
       where: { user_id: userId, isActive: true, endDate: MoreThanOrEqual(now) },

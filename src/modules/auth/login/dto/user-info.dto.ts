@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, MinLength, Length, isNotEmpty } from 'class-validator';
+import { AgentProfileInfoDto } from './agent-profile-info.dto';
 
 export class UserInfoDto {
   @ApiProperty({
@@ -32,6 +32,18 @@ export class UserInfoDto {
     example: 'Doe'
   })
   lastName: string;
+
+  @ApiProperty({
+    description: 'User agent ID',
+    example: '123e4567-e89b-12d3-a456-426614174000'
+  })
+  agent?: AgentProfileInfoDto;
+
+  @ApiProperty({
+    description: 'User account status',
+    example: true
+  })
+  isActive: boolean;
 
   @ApiProperty({
     description: 'User roles',

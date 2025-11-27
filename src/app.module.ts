@@ -24,17 +24,24 @@ import { UserInteractionsModule } from './modules/user-interactions/user-interac
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      envFilePath: path.resolve(process.cwd(), '.env.development'),
+      envFilePath: path.resolve(
+        process.cwd(),
+        process.env.NODE_ENV === 'qa'
+          ? '.env.qa'
+          : process.env.NODE_ENV === 'production'
+            ? '.env.production'
+            : '.env.development'
+      ),
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
+        NODE_ENV: Joi.string().valid('development', 'qa', 'production').default('development'),
         PORT: Joi.number().default(3000),
 
         // Database
-        POSTGRES_HOST: Joi.string().required(),
-        POSTGRES_PORT: Joi.number().default(5432),
-        POSTGRES_USER: Joi.string().required(),
-        POSTGRES_PASSWORD: Joi.string().allow('', null),
-        POSTGRES_DB: Joi.string().required(),
+        DB_HOST: Joi.string().required(),
+        DB_PORT: Joi.number().default(5432),
+        DB_USER: Joi.string().required(),
+        DB_PASSWORD: Joi.string().allow('', null),
+        DB_NAME: Joi.string().required(),
 
         // JWT
         JWT_SECRET: Joi.string().min(16).required(),

@@ -19,7 +19,7 @@ export class UserSubscription {
   id: number;
 
   @Column()
-  user_id: number;
+  user_id: string;
 
   @ManyToOne(() => SubscriptionPlan, (plan) => plan.userSubscriptions)
   @JoinColumn({ name: 'plan_id' })

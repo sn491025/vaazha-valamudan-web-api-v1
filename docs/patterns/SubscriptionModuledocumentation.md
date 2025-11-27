@@ -562,22 +562,41 @@ DELETE /api/subscription-plans/:planId/items/:itemId
 GET /api/users/:userId/subscription
 ```
 
-#### Subscribe User to Plan
+#### Create Subscription Order
 ```
-POST /api/users/:userId/subscribe
+POST /api/users/:userId/subscribe/order
 ```
 
 **Request Body:**
 ```json
 {
-  "plan_id": 2,
-  "startDate": "2025-10-01T00:00:00.000Z",
-  "endDate": "2025-10-31T00:00:00.000Z",
-  "autoRenew": true,
-  "paidAmount": 1999.00,
-  "paymentStatus": "Paid",
-  "transactionId": "pay_abc123",
-  "promoCodeUsed": "NEW10"
+  "plan_id": 2
+}
+```
+
+**Response:**
+```json
+{
+  "id": "order_M7...",
+  "entity": "order",
+  "amount": 199900,
+  "currency": "INR",
+  "receipt": "receipt_sub_...",
+  "status": "created"
+}
+```
+
+#### Verify Subscription Payment
+```
+POST /api/users/:userId/subscribe/verify
+```
+
+**Request Body:**
+```json
+{
+  "razorpay_order_id": "order_M7...",
+  "razorpay_payment_id": "pay_M7...",
+  "razorpay_signature": "generated_signature_here"
 }
 ```
 
@@ -593,22 +612,42 @@ POST /api/users/:userId/subscription/:id/cancel
 
 ### Add-ons API
 
-#### Purchase Add-on
+#### Create Add-on Order
 ```
-POST /api/users/:userId/add-ons
+POST /api/users/:userId/addons/order
 ```
 
 **Request Body:**
 ```json
 {
   "item_id": 10,
-  "userSubscription_id": 42,
-  "startDate": "2025-10-05T00:00:00.000Z",
-  "endDate": "2025-10-12T00:00:00.000Z",
-  "paidAmount": 499.00,
-  "paymentStatus": "Paid",
-  "transactionId": "pay_xyz789",
-  "appliedTo": "property_123"
+  "userSubscription_id": 42
+}
+```
+
+**Response:**
+```json
+{
+  "id": "order_A8...",
+  "entity": "order",
+  "amount": 49900,
+  "currency": "INR",
+  "receipt": "receipt_addon_...",
+  "status": "created"
+}
+```
+
+#### Verify Add-on Payment
+```
+POST /api/users/:userId/addons/verify
+```
+
+**Request Body:**
+```json
+{
+  "razorpay_order_id": "order_A8...",
+  "razorpay_payment_id": "pay_A8...",
+  "razorpay_signature": "generated_signature_here"
 }
 ```
 

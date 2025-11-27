@@ -16,6 +16,7 @@ import { PropertyFeatureValue } from './property-feature-value.entity';
 import { PropertyMedia } from './property-media.entity';
 import { PropertyApproval } from './property-approval.entity';
 import { PropertyReport } from './property-report.entity';
+import { AgentCompanyProfile } from '../../users/entities/agent-company-profile.entity';
 
 
 @Entity('properties')
@@ -130,10 +131,9 @@ export class Property {
   @Column({ type: 'uuid' })
   owner_id: string;
 
-  // Agent/broker information (if different from owner)
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => AgentCompanyProfile, { nullable: true })
   @JoinColumn({ name: 'agent_id' })
-  agent: User;
+  agent: AgentCompanyProfile;
 
   @Column({ type: 'uuid', nullable: true })
   agent_id: string;
