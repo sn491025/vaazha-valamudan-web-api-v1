@@ -12,6 +12,7 @@ import { WhatsAppOtpService } from './services/otp/whatsapp-otp.service';
 import { CustomOtpService } from './services/otp/custom-otp.service';
 import { S3StorageService } from './storage/s3-storage.service';
 import { HttpModule } from '@nestjs/axios';
+import { RazorpayService } from './services/payment/razorpay.service';
 
 const services = [
   OtpService,
